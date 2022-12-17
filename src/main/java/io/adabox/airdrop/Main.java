@@ -17,7 +17,6 @@ import com.bloxbean.cardano.client.function.*;
 import com.bloxbean.cardano.client.function.helper.ChangeOutputAdjustments;
 import com.bloxbean.cardano.client.function.helper.FeeCalculators;
 import com.bloxbean.cardano.client.function.helper.InputBuilders;
-import com.bloxbean.cardano.client.transaction.model.PaymentTransaction;
 import com.bloxbean.cardano.client.transaction.spec.Transaction;
 import com.bloxbean.cardano.client.util.AssetUtil;
 import com.bloxbean.cardano.client.util.JsonUtil;
@@ -26,12 +25,9 @@ import com.bloxbean.cardano.client.util.Tuple;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Scanner;
-
-import static com.bloxbean.cardano.client.common.CardanoConstants.ONE_ADA;
 
 import static com.bloxbean.cardano.client.function.helper.SignerProviders.signerFrom;
 
@@ -86,12 +82,12 @@ public class Main {
                 .andThen(FeeCalculators.feeCalculator(senderAddress, 1))
                 .andThen(ChangeOutputAdjustments.adjustChangeOutput(senderAddress, 1));
 
-        TxSigner signer = signerFrom(sender);
-        Transaction signedTxn = TxBuilderContext.init(utxoSupplier,protocolParams).buildAndSign(builder, signer);
+        Transaction signedTransaction = TxBuilderContext.init(utxoSupplier,protocolParams)
+                .buildAndSign(builder, signerFrom(sender));
 
-        System.out.println(signedTxn);
+        System.out.println(signedTransaction);
 
-        Result<String> result = backendService.getTransactionService().submitTransaction(signedTxn.serialize());
+        Result<String> result = backendService.getTransactionService().submitTransaction(signedTransaction.serialize());
         System.out.println(result);
 
         waitForTransaction(result);
